@@ -1,0 +1,280 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+
+<PageTitle>Progress Updates</PageTitle>
+
+<h1>Progress Updates</h1>
+
+<p>This component demonstrates watching a progress event from the server.</p>
+
+<button class="btn btn-primary" @onclick="RunTaskOne">Run Simple Task</button>
+
+<button class="btn btn-primary" @onclick="RunTaskTwo">Run Task With Children</button>
+
+<button class="btn btn-primary" @onclick="RunTaskThree">Run Task With Static Children</button>
+<br />
+<h4>Running Services</h4>
+<ul id="messagesList">
+    @foreach (var message in runningServices)
+    {
+        <li>@message.Key => (@message.Value)</li>
+    }
+</ul>
+<br />
+
+
+@if (progtest != null)
+{
+<h4>Running Simple Progress</h4>
+<div class="progress">
+  <div class="progress-bar" role="progressbar" style="width: @Math.Round(progtest.Percentage)%" aria-valuenow="@progtest.CurrentTick" aria-valuemin="0" aria-valuemax="@progtest.MaxTicks">
+      @progtest.ToString()
+  </div>
+</div>
+<br />
+}
+
+<br />
+@if (childtest != null)
+{
+<h4>Running Progressbars with Children</h4>
+<div class="progress">
+  <div class="progress-bar" role="progressbar" style="width: @Math.Round(childtest.Percentage)%" aria-valuenow="@childtest.CurrentTick" aria-valuemin="0" aria-valuemax="@childtest.MaxTicks">
+      @childtest.ToString()
+  </div>
+</div>
+<div style="margin-left:20px">
+    @foreach (var childbar in @childtest.Children)
+   {
+       <div class="progress" style="margin-top:10px">
+  <div class="progress-bar bg-warning" role="progressbar" style="width: @Math.Round(childbar.Percentage)%" aria-valuenow="@childbar.CurrentTick" aria-valuemin="0" aria-valuemax="@childbar.MaxTicks">
+      @childbar.ToString()
+  </div>
+</div>
+   }
+</div>
+<br />
+}
+<br />
+
+@if (childtestNoCollapse != null)
+{
+<h4>Running Progressbars with Children</h4>
+<div class="progress">
+  <div class="progress-bar" role="progressbar" style="width: @Math.Round(childtestNoCollapse.Percentage)%" aria-valuenow="@childtestNoCollapse.CurrentTick" aria-valuemin="0" aria-valuemax="@childtestNoCollapse.MaxTicks">
+      @childtestNoCollapse.ToString()
+  </div>
+</div>
+<div style="margin-left:20px">
+    @foreach (var childbar in @childtestNoCollapse.Children)
+   {
+       <div class="progress" style="margin-top:10px">
+  <div class="progress-bar bg-warning" role="progressbar" style="width: @Math.Round(childbar.Percentage)%" aria-valuenow="@childbar.CurrentTick" aria-valuemin="0" aria-valuemax="@childbar.MaxTicks">
+      @childbar.ToString()
+  </div>
+</div>
+   }
+</div>
+<br />
+}
+<br />
+
+<h5>Lines</h5>
+<ul id="messagesList">
+    @foreach (var message in lines)
+    {
+        <li>@message</li>
+    }
+</ul>
+<h5>Errors</h5>
+<ul id="messagesList">
+    @foreach (var message in errors)
+    {
+        <li>@message</li>
+    }
+</ul>
+@code {
+    Dictionary<string, Guid> runningServices = new Dictionary<string, Guid>();
+    ProgressReport progtest;
+    ProgressReport childtest;
+    ProgressReport childtestNoCollapse;
+
+    List<string> lines = new List<string>();
+    List<string> errors = new List<string>();
+
+    protected override async Task OnInitializedAsync()
+    {
+
+
+
+        var hubConnection = new HubConnectionBuilder()
+            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .Build();
+
+        hubConnection.On<Guid, string>("writeLine", (task, message) =>
+        {
+            var encodedMsg = $"{task}: {message}";
+            lines.Add(encodedMsg);
+            StateHasChanged();
+        });
+
+        hubConnection.On<Guid, string>("writeError", (task, message) =>
+        {
+            var encodedMsg = $"{task}: {message}";
+            errors.Add(encodedMsg);
+            StateHasChanged();
+        });
+        await hubConnection.StartAsync();
+
+
+        ObserveRunningServices();
+    }
+
+    private async Task HandleUpdatesForTaskOne(Guid id)
+    {
+        var hubConnection = new HubConnectionBuilder()
+            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        await foreach(var data in hubConnection.StreamAsync<ProgressReport>("Runnin",id))
+        {
+            if (data == null)
+            {
+                //progtest.Percentagez
+                StateHasChanged();
+                break;
+            }
+            else
+            {
+                progtest = data;
+                StateHasChanged();
+            }
+        }
+    }
+    private async Task HandleUpdatesForTaskTwo(Guid id)
+    {
+        var hubConnection = new HubConnectionBuilder()
+            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        await foreach(var data in hubConnection.StreamAsync<ProgressReport>("Runnin",id))
+        {
+            if (data == null)
+            {
+                //progtest.Percentagez
+                StateHasChanged();
+                break;
+            }
+            else
+            {
+                childtest = data;
+                StateHasChanged();
+            }
+        }
+    }
+    private async Task HandleUpdatesForTaskThree(Guid id)
+    {
+        var hubConnection = new HubConnectionBuilder()
+            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        await foreach(var data in hubConnection.StreamAsync<ProgressReport>("Runnin",id))
+        {
+            if (data == null)
+            {
+                //progtest.Percentagez
+                StateHasChanged();
+                break;
+            }
+            else
+            {
+                childtestNoCollapse = data;
+                StateHasChanged();
+            }
+        }
+    }
+    private async Task ObserveRunningServices()
+    {
+        var hubConnection = new HubConnectionBuilder()
+            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        await foreach(var data in hubConnection.StreamAsync<Dictionary<string,Guid>>("StreamRunningServices"))
+        {
+            foreach (var item in data)
+            {
+                if (!runningServices.Where(x => x.Value == item.Value).Any())
+                {
+                    if (item.Key.Equals("RunSingle",StringComparison.OrdinalIgnoreCase))
+                    {
+                        HandleUpdatesForTaskOne(item.Value);
+                    }
+                    else if (item.Key.Equals("RunWithChild",StringComparison.OrdinalIgnoreCase))
+                    {
+                        HandleUpdatesForTaskTwo(item.Value);
+                    }
+                    else if (item.Key.Equals("RunWithChildStatic",StringComparison.OrdinalIgnoreCase))
+                    {
+                        HandleUpdatesForTaskThree(item.Value);
+                    }
+                    
+                }
+
+            }
+            runningServices = data;
+
+            StateHasChanged();
+        }
+    }
+
+    private async Task RunTaskOne()
+    {
+        var hubConnection = new HubConnectionBuilder()
+            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("StartTask","RunSingle");
+        }
+    }
+
+    private async Task RunTaskTwo()
+    {
+        var hubConnection = new HubConnectionBuilder()
+            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("StartTask","RunWithChild");
+        }
+    }
+
+    private async Task RunTaskThree()
+    {
+        var hubConnection = new HubConnectionBuilder()
+            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        if (hubConnection is not null)
+        {
+            await hubConnection.SendAsync("StartTask","RunWithChildStatic");
+        }
+    }
+
+}
