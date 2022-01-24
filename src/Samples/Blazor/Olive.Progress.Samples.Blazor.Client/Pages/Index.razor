@@ -98,6 +98,9 @@
     ProgressReport progtest;
     ProgressReport childtest;
     ProgressReport childtestNoCollapse;
+    string basePath = "http://localhost:5146";
+    //string basePath = "http://localhost:5146";
+
 
     List<string> lines = new List<string>();
     List<string> errors = new List<string>();
@@ -108,7 +111,7 @@
 
 
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .WithUrl(new Uri(basePath+"/proghub"))
             .Build();
 
         hubConnection.On<Guid, string>("writeLine", (task, message) =>
@@ -133,7 +136,7 @@
     private async Task HandleUpdatesForTaskOne(Guid id)
     {
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .WithUrl(new Uri(basePath+"/proghub"))
             .Build();
 
         await hubConnection.StartAsync();
@@ -156,7 +159,7 @@
     private async Task HandleUpdatesForTaskTwo(Guid id)
     {
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .WithUrl(new Uri(basePath+"/proghub"))
             .Build();
 
         await hubConnection.StartAsync();
@@ -179,7 +182,7 @@
     private async Task HandleUpdatesForTaskThree(Guid id)
     {
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .WithUrl(new Uri(basePath+"/proghub"))
             .Build();
 
         await hubConnection.StartAsync();
@@ -202,7 +205,7 @@
     private async Task ObserveRunningServices()
     {
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .WithUrl(new Uri(basePath+"/proghub"))
             .Build();
 
         await hubConnection.StartAsync();
@@ -238,7 +241,7 @@
     private async Task RunTaskOne()
     {
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .WithUrl(new Uri(basePath+"/proghub"))
             .Build();
 
         await hubConnection.StartAsync();
@@ -252,7 +255,7 @@
     private async Task RunTaskTwo()
     {
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .WithUrl(new Uri(basePath+"/proghub"))
             .Build();
 
         await hubConnection.StartAsync();
@@ -266,7 +269,7 @@
     private async Task RunTaskThree()
     {
         var hubConnection = new HubConnectionBuilder()
-            .WithUrl(new Uri("http://localhost:5146/proghub"))
+            .WithUrl(new Uri(basePath+"/proghub"))
             .Build();
 
         await hubConnection.StartAsync();
