@@ -48,7 +48,7 @@
         }
         public Guid Id { get; set; }
         public int CurrentTick => _currentTick;
-
+        public bool CollapseChildrenWhenDone { get =>_collapseChildrenWhenDone;}
         public int MaxTicks
         {
             get => _maxTicks;

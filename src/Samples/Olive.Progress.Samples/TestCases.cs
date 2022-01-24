@@ -29,7 +29,7 @@
         public static async Task RunTaskWithChildren(ProgressWatcher pbar)
         {
             var maxticks = 8;
-            var maxticksPerChild = 500;
+            var maxticksPerChild = 200;
             var interval = 10;
 
             pbar.Register(maxticks, "Simple Test");

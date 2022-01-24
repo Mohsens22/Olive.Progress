@@ -16,3 +16,8 @@ var cgildWatcher = new ProgressWatcher();
 cgildWatcher.HandleForConsole();
 
 await TestCases.RunTaskWithChildren(cgildWatcher);
+
+var staticChildren = new ProgressWatcher();
+staticChildren.HandleForConsole();
+
+await TestCases.RunTaskWithStaticChildren(staticChildren);

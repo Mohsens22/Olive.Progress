@@ -17,9 +17,15 @@ namespace Olive.Progress.Samples.Console
 
         private static void Watcher_OnRegistered(ProgressWatcher sender, Guid e)
         {
+            var options = new ProgressBarOptions
+            {
+                ForegroundColor = ConsoleColor.Green,
+                BackgroundColor = ConsoleColor.DarkGray,
+            };
+
             int totalTicks = sender.MaxTicks;
 
-            var pbar = new ProgressBar(totalTicks, sender.Message);
+            var pbar = new ProgressBar(totalTicks, sender.Message,options);
             sender.OnTicked += (s, e) => {
                 pbar.Tick(s.Message);
             };
@@ -33,7 +39,14 @@ namespace Olive.Progress.Samples.Console
             };
             sender.OnChildAdded += (s, e, i) =>
             {
-                var childbar = pbar.Spawn(e.MaxTicks,e.Message);
+                var childOptions = new ProgressBarOptions
+                {
+                    ForegroundColor = ConsoleColor.Yellow,
+                    BackgroundColor = ConsoleColor.DarkGray,
+                    ProgressCharacter = '─'
+                };
+                childOptions.CollapseWhenFinished = s.CollapseChildrenWhenDone;
+                var childbar = pbar.Spawn(e.MaxTicks,e.Message,childOptions);
                 e.OnTicked += (s, e) =>
                 {
                     childbar.Tick(s.Message);
