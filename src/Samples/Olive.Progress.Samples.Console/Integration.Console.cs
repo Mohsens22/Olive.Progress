@@ -33,9 +33,9 @@ namespace Olive.Progress.Samples.Console
             {
                 pbar.WriteLine(l);
             };
-            sender.OnLogFired += (s, e, l) =>
+            sender.OnLogFired += (s, e, l,log) =>
             {
-                Debug.WriteLine(l);
+                Debug.WriteLine(log.ToString() +": "+l);
             };
             sender.OnChildAdded += (s, e, i) =>
             {

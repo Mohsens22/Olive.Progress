@@ -5,6 +5,11 @@ namespace Olive.Progress.Samples.Api
 {
     public class ProgressHub : Hub
     {
+        ILogger _logger;
+        public ProgressHub(ILogger<ProgressHub> logger)
+        {
+            _logger = logger;
+        }
         internal static List<KeyValuePair<string, ProgressWatcher>> RunningServices = new List<KeyValuePair<string, ProgressWatcher>>();
         public async Task StartTask(string taskName)
         {
@@ -91,10 +96,11 @@ namespace Olive.Progress.Samples.Api
                 await WriteLine(e, l);
                 Console.WriteLine(e + " " + l);
             };
-            watcher.OnLogFired += async (s, e, l) =>
+            watcher.OnLogFired += async (s, e, l,logtype) =>
             {
                 await WriteError(e, l);
-                Debug.WriteLine(e + " " + l);
+                
+                _logger.Log(logtype,l,e);
             };
 
         }

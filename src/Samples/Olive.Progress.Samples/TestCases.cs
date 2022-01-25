@@ -19,7 +19,7 @@
 
                 if (i %200==0)
                 {
-                    pbar.Log("Error happened");
+                    pbar.LogError("Error happened");
                 }
                 pbar.Tick();
                 await Task.Delay(interval);
@@ -42,7 +42,7 @@
                 }
                 if (i == 7)
                 {
-                    pbar.Log("Log 7 from the main bar");
+                    pbar.LogInformation("Log 7 from the main bar");
                 }
                 var childBar = pbar.Spawn(maxticksPerChild,"Child "+i);
                 for (int j = 0; j < maxticksPerChild; j++)
@@ -53,7 +53,7 @@
                     }
                     if (j == 6)
                     {
-                        childBar.Log("Log 6 from the child bar: " + j);
+                        childBar.LogInformation("Log 6 from the child bar: " + j);
                     }
                     childBar.Tick();
                     await Task.Delay(interval);
@@ -79,7 +79,7 @@
                 }
                 if (i == 7)
                 {
-                    pbar.Log("Log 7 from the main bar");
+                    pbar.LogInformation("Log 7 from the main bar");
                 }
                 var childBar = pbar.Spawn(maxticksPerChild, "Child " + i);
                 for (int j = 0; j < maxticksPerChild; j++)
@@ -90,7 +90,7 @@
                     }
                     if (j == 6)
                     {
-                        childBar.Log("Log 6 from the child bar: " + j);
+                        childBar.LogInformation("Log 6 from the child bar: " + j);
                     }
                     childBar.Tick();
                     await Task.Delay(interval);

@@ -1,12 +1,13 @@
 ﻿namespace Olive.Progress
 {
+    using Microsoft.Extensions.Logging;
     using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.Text;
     using System.Threading;
 
-    public class ProgressWatcher : IProgressWatcher
+    public partial class ProgressWatcher : IProgressWatcher
     {
         protected readonly DateTime _startDate = DateTime.Now;
         private int _maxTicks;
@@ -23,16 +24,11 @@
         public delegate void OnFinishedHandler(ProgressWatcher sender, Guid e);
         public event OnFinishedHandler OnFinished;
 
-        public delegate void OnMessageFiredHandler(ProgressWatcher sender, Guid e,string line);
-        public event OnMessageFiredHandler OnMessageFired;
-
-        public event OnMessageFiredHandler OnLogFired;
 
         public delegate void ChildHandler(ProgressWatcher sender, ProgressWatcher child, Guid childId);
         public event ChildHandler OnChildAdded;
         public event ChildHandler OnChildRemoved;
 
-        bool _collapseChildrenWhenDone;
         public ProgressWatcher()
         {
             
@@ -44,11 +40,11 @@
             this._maxTicks = Math.Max(0, maxTicks);
             this._message = message;
             OnRegistered?.Invoke(this,this.Id);
-            _collapseChildrenWhenDone= collapseChildren;
+            CollapseChildrenWhenDone= collapseChildren;
         }
         public Guid Id { get; set; }
         public int CurrentTick => _currentTick;
-        public bool CollapseChildrenWhenDone { get =>_collapseChildrenWhenDone;}
+        public bool CollapseChildrenWhenDone { get; private set; }
         public int MaxTicks
         {
             get => _maxTicks;
@@ -111,7 +107,7 @@
 
             pbar.OnFinished += (s, e) =>
             {
-                if (_collapseChildrenWhenDone)
+                if (CollapseChildrenWhenDone)
                 {
                     this.Children.Remove(pbar);
                 }
@@ -122,9 +118,9 @@
             return pbar;
         }
 
-        private void Pbar_OnLogFired(ProgressWatcher sender, Guid e, string line)
+        private void Pbar_OnLogFired(ProgressWatcher sender, Guid e, string line, LogLevel logLevel)
         {
-            Log(line, sender);
+            Log(line, sender, logLevel);
         }
 
         private void Pbar_OnMessageFired(ProgressWatcher sender, Guid e, string line)
@@ -155,22 +151,7 @@
             }
             OnTicked?.Invoke(this,this.CurrentTick);
         }
-        public void WriteLine(string message)
-        {
-            OnMessageFired?.Invoke(this,this.Id,message);
-        }
-        public void Log(string message)
-        {
-            OnLogFired?.Invoke(this, this.Id, message);
-        }
-        private void WriteLine(string message,ProgressWatcher child)
-        {
-            OnMessageFired?.Invoke(child, child.Id, message);
-        }
-        public void Log(string message, ProgressWatcher child)
-        {
-            OnLogFired?.Invoke(child, child.Id, message);
-        }
+        
 
         public override string ToString()=> $"{Percentage}% - {Message} ({CurrentTick}/{MaxTicks})";
     }

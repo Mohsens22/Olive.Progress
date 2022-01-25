@@ -4,6 +4,7 @@ using Olive.Progress.Samples.Api;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddSignalR();
+
 builder.Services.AddCors();
 builder.Services.AddResponseCompression(opts =>
 {
