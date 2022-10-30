@@ -10,6 +10,7 @@ namespace Olive.Progress.Samples.Console
 {
     static class Integration
     {
+        static ProgressBar current;
         public static void HandleForConsole(this ProgressWatcher watcher)
         {
             watcher.OnRegistered += Watcher_OnRegistered;
@@ -25,17 +26,26 @@ namespace Olive.Progress.Samples.Console
 
             int totalTicks = sender.MaxTicks;
 
-            var pbar = new ProgressBar(totalTicks, sender.Message,options);
+            if (current != null)
+                current.Dispose();
+
+            var pbar = new ProgressBar(totalTicks, sender.Message, options);
+            current = pbar;
             sender.OnTicked += (s, e) => {
                 pbar.Tick(s.Message);
             };
-            sender.OnMessageFired += (s, e,l) => 
+            sender.OnMessageFired += (s, e, l) =>
             {
                 pbar.WriteLine(l);
             };
-            sender.OnLogFired += (s, e, l,log) =>
+            sender.OnLogFired += (s, e, l, level) =>
             {
-                Debug.WriteLine(log.ToString() +": "+l);
+#if DEBUG
+                Debug.WriteLine(l);
+#endif
+#if RELEASE
+                pbar.WriteLine(l);
+#endif
             };
             sender.OnChildAdded += (s, e, i) =>
             {
@@ -46,7 +56,7 @@ namespace Olive.Progress.Samples.Console
                     ProgressCharacter = '─'
                 };
                 childOptions.CollapseWhenFinished = s.CollapseChildrenWhenDone;
-                var childbar = pbar.Spawn(e.MaxTicks,e.Message,childOptions);
+                var childbar = pbar.Spawn(e.MaxTicks, e.Message, childOptions);
                 e.OnTicked += (s, e) =>
                 {
                     childbar.Tick(s.Message);
@@ -58,7 +68,7 @@ namespace Olive.Progress.Samples.Console
             };
             sender.OnFinished += (s, e) =>
             {
-                pbar.Tick(s.CurrentTick,s.Message);
+                pbar.Tick(s.CurrentTick, s.Message);
                 pbar.Dispose();
             };
         }
